@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>License Plate Detection</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .background {
+            background-image: url(static/tesla_header.webp);
+            height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .video-container {
+            width: 640px;
+            height: 480px;
+        }
+        .info {
+            margin-top: 20px;
+        }
+        pre {
+            text-align: left;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div class="video-container">
+            <img id="video" src="{{ url_for('video_feed') }}" alt="Video feed" width="640" height="480">
+        </div>
+        <div class="info">
+            <h2 id="plate">Detected Plate: None</h2>
+            <div id="plate_info">No data available</div>
+        </div>
+    </div>
+
+    <script>
+        function checkDetectedPlate() {
+            fetch('/get_detected_plate')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.plate) {
+                        document.getElementById('plate').textContent = `Detected Plate: ${data.plate}`;
+                        if (data.data.length > 0) {
+                            // Display the fetched Excel data in a formatted way
+                            document.getElementById('plate_info').innerHTML = 
+                                `<pre>${JSON.stringify(data.data, null, 2)}</pre>`;
+                        } else {
+                            document.getElementById('plate_info').textContent = "No matching data found";
+                        }
+                    }
+                });
+        }
+
+        setInterval(checkDetectedPlate, 500);  // Poll every 0.5 seconds
+    </script>
+</body>
+</html>
